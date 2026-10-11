@@ -400,6 +400,7 @@
     font-variant-numeric: var(--font-counter-variant);
   }
   .journal-list article.journal-row h3 {
+    hyphens: auto;
     overflow-wrap: anywhere;
   }
   /* --- BUTTONS UND LINKS --- */
