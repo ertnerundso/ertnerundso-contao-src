@@ -44,10 +44,16 @@ for(const width of [360,390,760,1000,1440,2560]) {
     const controls = await page.locator('.journal-slider-controls').evaluate(el => {
       const list = document.querySelector('.journal-list').getBoundingClientRect();
       const rect = el.getBoundingClientRect();
-      return {left:rect.left-list.left,top:rect.top-list.bottom};
+      const link = document.querySelector('.journal-heading-actions > .text-link').getBoundingClientRect();
+      return {left:rect.left-list.left,right:rect.right-list.right,bottom:rect.bottom-list.top,
+        overlapsLink:rect.left<link.right && rect.right>link.left && rect.top<link.bottom && rect.bottom>link.top};
     });
-    expect(Math.abs(controls.left)).toBeLessThanOrEqual(0.5);
-    expect(controls.top).toBeGreaterThan(0);
+    expect(controls.left).toBeGreaterThanOrEqual(-0.5);
+    expect(controls.right).toBeLessThanOrEqual(0.5);
+    expect(controls.bottom).toBeLessThan(0);
+    expect(controls.overlapsLink).toBe(false);
+    await expect(page.locator('.section-head .journal-heading-actions .journal-slider-controls')).toHaveCount(1);
+    await expect(page.locator('.journal-heading-actions > .text-link')).toBeVisible();
     for (const button of [back,next]) {
       await expect(button.locator('.button-label')).toBeHidden();
       const rect = await button.boundingBox();

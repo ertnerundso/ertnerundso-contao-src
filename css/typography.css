@@ -80,6 +80,7 @@
     --font-label-size: 0.6875rem;
     --font-label-weight: 400;
     --font-label-line-height: 1.5;
+    --font-counter-variant: tabular-nums;
     --font-button-size: 1rem;
     --font-button-weight: 400;
     --font-quote-size: var(--font-h3-size);
@@ -393,6 +394,10 @@
   }
   .journal-list article.journal-row {
     counter-increment: home-journal;
+  }
+  .journal-slider-status {
+    white-space: nowrap;
+    font-variant-numeric: var(--font-counter-variant);
   }
   .journal-list article.journal-row h3 {
     overflow-wrap: anywhere;

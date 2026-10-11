@@ -1,17 +1,11 @@
 {% if link|trim('/') != app.request.pathInfo|trim('/') %}
-    <article class="journal-related-card">
-        <a class="journal-related-link" href="{{ link }}">
-            {% if addImage %}
-                <div class="journal-related-image">{{ include('@Contao/image.html.twig') }}</div>
-            {% endif %}
-            <div class="journal-related-copy">
-                {% if date|default('') %}
-                    <p class="micro journal-related-date"><time{% if datetime|default('') %} datetime="{{ datetime }}"{% endif %}>{{ datetime|default('') ? datetime|date('d.m.Y') : date }}</time></p>
-                {% endif %}
-                <h3>{{ headline }}</h3>
-                {% if teaser|default('') %}<p class="journal-related-teaser">{{ teaser|striptags|u.truncate(150, '…') }}</p>{% endif %}
-                <span class="journal-related-arrow" aria-hidden="true">↗</span>
-            </div>
-        </a>
+    <article class="journal-related-card journal-row">
+        <p class="micro row-category journal-related-date">{% if date|default('') %}<time{% if datetime|default('') %} datetime="{{ datetime }}"{% endif %}>{{ datetime|default('') ? datetime|date('d.m.Y') : date }}</time>{% else %}JOURNAL{% endif %}</p>
+        {% if addImage %}
+            <div class="journal-related-image">{{ include('@Contao/image.html.twig') }}</div>
+        {% endif %}
+        <h3><a href="{{ link }}">{{ headline }}</a></h3>
+        {% if teaser|default('') %}<p class="journal-excerpt journal-related-teaser">{{ teaser|striptags|u.truncate(150, '…') }}</p>{% endif %}
+        <span class="row-arrow journal-related-arrow" aria-hidden="true">↗</span>
     </article>
 {% endif %}
