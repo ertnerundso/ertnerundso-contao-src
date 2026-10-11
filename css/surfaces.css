@@ -900,6 +900,33 @@
     color: var(--color-primary);
   }
   /* --- BUTTONS UND LINKS --- */
+  /* Ein gemeinsamer, dezenter Rahmen statt einzelner gefüllter Navigationsbuttons. */
+  .journal-slider-controls {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    background: var(--color-background);
+  }
+  .journal-slider-controls .journal-page-button {
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--color-transparent);
+    color: var(--color-primary);
+  }
+  .journal-slider-controls .journal-page-button:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: var(--color-on-dark);
+  }
+  .journal-slider-controls .journal-page-button .button-arrow {
+    background: var(--color-transparent);
+    color: inherit;
+  }
+  .journal-slider-status::before {
+    content: none;
+  }
+  .journal-slider-status {
+    border-inline: 1px solid var(--color-border);
+    color: var(--color-primary);
+  }
   .journal .is-journal-paged .row-category::before {
     content: attr(data-journal-index) " / ";
   }

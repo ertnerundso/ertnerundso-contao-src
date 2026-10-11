@@ -10,6 +10,8 @@ export function initJournal(runtime) {
     const english = document.documentElement.lang === 'en';
     const controls = document.createElement('div');
     controls.className = 'journal-slider-controls';
+    controls.setAttribute('role', 'group');
+    controls.setAttribute('aria-label', english ? 'Browse journal articles' : 'Journalbeiträge durchblättern');
     const status = document.createElement('span');
     status.className = 'journal-slider-status micro';
     status.setAttribute('aria-live', 'polite');
@@ -18,7 +20,7 @@ export function initJournal(runtime) {
     const buttons = [-1, 1].map(direction => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'button btn--icon journal-page-button';
+      button.className = 'button btn--secondary btn--icon journal-page-button';
       button.textContent = direction < 0 ? (english ? 'Back' : 'Zurück') : (english ? 'Next' : 'Weiter');
       button.setAttribute('aria-label', direction < 0
         ? (english ? 'Previous articles' : 'Vorherige Beiträge')
@@ -29,8 +31,18 @@ export function initJournal(runtime) {
       controls.append(button);
       return button;
     });
-    controls.append(status);
-    list.after(controls);
+    controls.replaceChildren(buttons[0], status, buttons[1]);
+    // Die Navigation gehört zum Abschnittskopf; native Contao-Links bleiben erhalten.
+    const heading = list.closest('.journal').querySelector('.section-head');
+    const journalLink = heading?.querySelector(':scope > .text-link');
+    const actions = heading ? document.createElement('div') : undefined;
+    const originalLinkSibling = journalLink?.nextSibling;
+    if (actions) {
+      actions.className = 'journal-heading-actions';
+      if (journalLink) actions.append(journalLink);
+      actions.append(controls);
+      heading.append(actions);
+    } else list.before(controls);
     list.tabIndex = 0;
     list.setAttribute('role', 'region');
     list.setAttribute('aria-label', english ? 'Journal articles' : 'Journalbeiträge');
@@ -103,6 +115,8 @@ export function initJournal(runtime) {
     observer(new ResizeObserver(resize), list);
     resize();
     runtime.cleanup(() => {
+      if (journalLink) heading.insertBefore(journalLink, originalLinkSibling);
+      actions?.remove();
       controls.remove();
       addedLinks.forEach(link => link.remove());
       list.classList.remove('is-journal-paged');
