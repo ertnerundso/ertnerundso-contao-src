@@ -24,20 +24,25 @@
         {{ articleText|raw }}
     </div>
 
-    <footer class="news-detail-outro">
-        <p class="micro">{{ isEnglish ? 'KEEP READING' : 'WEITERLESEN' }}</p>
-        <h2>{{ isEnglish ? 'More perspectives on technology.' : 'Mehr Perspektiven auf Technik.' }}</h2>
+    <footer class="news-detail-outro journal">
+        <div class="section-head">
+          <div>
+            <p class="micro">{{ isEnglish ? 'KEEP READING' : 'WEITERLESEN' }}</p>
+            <h2>{{ isEnglish ? 'More perspectives on technology.' : 'Mehr Perspektiven auf Technik.' }}</h2>
+          </div>
+          <a class="text-link" href="{{ journalUrl }}">{{ isEnglish ? 'All articles' : 'Alle Artikel' }} <span aria-hidden="true">↗</span></a>
+        </div>
         <div class="journal-related" data-journal-related>
             {{ frontend_module('newslist', {
                 news_archives: [archive.id],
                 news_template: 'news_related_eo',
+                cssID: ['', 'journal-list'],
                 news_order: 'order_date_desc',
                 numberOfItems: 7,
                 perPage: 0
             }) }}
         </div>
         <div class="news-detail-actions">
-            <a class="button btn--secondary" href="{{ journalUrl }}">{{ isEnglish ? 'All articles' : 'Alle Artikel' }}</a>
             <a class="text-link" href="{{ contactUrl }}">{{ isEnglish ? 'Discuss a project' : 'Projekt besprechen' }} <span aria-hidden="true">↗</span></a>
         </div>
     </footer>
