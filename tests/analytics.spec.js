@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 
 const fixture = `<!doctype html><html><body>
   <a href="/kontakt/" id="contact">Kontakt</a>
+  <a href="/kontakt?anliegen=storyboard" id="contact-native">Storyboard</a>
+  <a href="/en/kontakt" id="contact-en">Contact</a>
   <a href="https://cal.ertnerundso.de/eunds/30min" id="booking">Termin</a>
   <button class="showreel-action" type="button">Video</button>
 </body></html>`;
@@ -84,4 +86,22 @@ test('staging never sends analytics events, even with a mock consent', async ({ 
   await page.evaluate(() => document.dispatchEvent(new Event('eo:contact-success')));
   expect(await page.evaluate(() => window.dataLayer)).toEqual([]);
   expect(await page.evaluate(() => window.umamiEvents)).toEqual([]);
+});
+
+
+test('native slashless DE and EN contact paths count the same intent', async ({ page }) => {
+  await start(page, 'ertnerundso.com', true);
+  await page.locator('#contact-native').click();
+  await page.locator('#contact-en').click();
+  expect(await page.evaluate(() => window.umamiEvents)).toEqual(['contact_intent', 'contact_intent']);
+});
+
+test('withdrawal stops subsequent events without collecting field values', async ({ page }) => {
+  await start(page, 'ertnerundso.com', true);
+  await page.locator('#contact').click();
+  await page.evaluate(() => {
+    window.CookieScript.instance.currentState = () => ({ action: 'reject', categories: ['strict'] });
+  });
+  await page.locator('#booking').click();
+  expect(await page.evaluate(() => window.umamiEvents)).toEqual(['contact_intent']);
 });

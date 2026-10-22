@@ -22,6 +22,13 @@ export function initForms(runtime) {
     const initialLabel = submit.textContent;
     const english = document.documentElement.lang === 'en';
     const formBody = contactForm.querySelector('.formbody') || contactForm;
+    const messageField = contactForm.querySelector('[name="message"]');
+    if (new URLSearchParams(window.location.search).get(config.contact.intentParameter) ===
+        config.contact.storyboardIntent && !messageField.value.trim()) {
+      messageField.value = english
+        ? 'I am interested in a free storyboard for the following product: '
+        : 'Ich interessiere mich für ein kostenloses Storyboard für folgendes Produkt: ';
+    }
     const company = document.createElement('input');
     company.type = 'text';
     company.name = 'company';
@@ -38,6 +45,23 @@ export function initForms(runtime) {
       privacy.href = config.contact.privacyPath;
       privacy.textContent = english ? ' Privacy policy' : ' Datenschutzerklärung';
       consentLabel.append(privacy);
+    }
+    // Vorschau simuliert die Eingabeprüfung, versendet jedoch weder Daten noch Erfolgsereignisse.
+    if (document.querySelector(config.preview.selector)) {
+      status.hidden = false;
+      status.textContent = english
+        ? 'Preview: enquiries are not sent.'
+        : 'Vorschau: Anfragen werden nicht versendet.';
+      submit.closest('.widget')?.after(status);
+      listen(contactForm, 'submit', (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (!contactForm.reportValidity()) return;
+        status.textContent = english
+          ? 'Simulation complete. No enquiry was sent.'
+          : 'Simulation abgeschlossen. Es wurde keine Anfrage versendet.';
+      }, { capture: true });
+      return;
     }
     const security = document.createElement('div');
     security.className = 'cf-turnstile';

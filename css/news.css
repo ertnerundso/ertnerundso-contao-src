@@ -189,9 +189,6 @@
 .is-news-detail .mod_article > .contact-band {
   display: none;
 }
-.mod_article:has(> .mod_newslist.news-grid > .journal-index-item) > .inner-hero {
-  display: none;
-}
 .mod_newslist.news-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -214,7 +211,7 @@
   gap: var(--space-2xl);
   padding-block: var(--space-lg);
 }
-.news-grid .journal-index-item:first-child {
+.news-grid .journal-index-item.is-journal-featured {
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   min-height: min(78svh, 52rem);
   gap: var(--space-3xl);
@@ -225,7 +222,7 @@
   grid-row: 1;
   min-width: 0;
 }
-.news-grid .journal-index-item:first-child .journal-index-media {
+.news-grid .journal-index-item.is-journal-featured .journal-index-media {
   grid-column: 1;
 }
 .journal-index-media figure,
@@ -242,7 +239,7 @@
   aspect-ratio: 1.6;
   object-fit: cover;
 }
-.news-grid .journal-index-item:first-child .journal-index-media img {
+.news-grid .journal-index-item.is-journal-featured .journal-index-media img {
   aspect-ratio: 1.06;
 }
 .journal-index-media-fallback {
@@ -253,7 +250,7 @@
   aspect-ratio: 1.6;
   padding: var(--space-sm);
 }
-.news-grid .journal-index-item:first-child .journal-index-media-fallback {
+.news-grid .journal-index-item.is-journal-featured .journal-index-media-fallback {
   aspect-ratio: 1.06;
   padding: var(--space-xl);
 }
@@ -270,7 +267,7 @@
   gap: var(--space-lg);
   min-width: 0;
 }
-.news-grid .journal-index-item:first-child .journal-index-copy {
+.news-grid .journal-index-item.is-journal-featured .journal-index-copy {
   grid-column: 2;
   display: flex;
   flex-direction: column;
@@ -279,21 +276,21 @@
   padding-block: var(--space-sm);
 }
 .journal-index-date,
-.journal-index-copy :is(h1, h3),
+.journal-index-copy h3,
 .journal-index-teaser {
   margin: 0;
 }
-.news-grid .journal-index-item:first-child .journal-index-copy h1 {
+.news-grid .journal-index-item.is-journal-featured .journal-index-copy h3 {
   margin-top: var(--space-2xl);
 }
-.news-grid .journal-index-item:first-child .journal-index-teaser {
+.news-grid .journal-index-item.is-journal-featured .journal-index-teaser {
   margin-top: auto;
   padding-top: var(--space-2xl);
 }
 .journal-index-read {
   display: none;
 }
-.news-grid .journal-index-item:first-child .journal-index-read {
+.news-grid .journal-index-item.is-journal-featured .journal-index-read {
   display: inline-flex;
   align-self: flex-start;
   margin-top: var(--space-lg);
@@ -351,30 +348,30 @@
     flex-basis: 68%;
   }
   .news-grid .journal-index-item,
-  .news-grid .journal-index-item:first-child {
+  .news-grid .journal-index-item.is-journal-featured {
     grid-template-columns: minmax(0, 1fr) minmax(6rem, 10rem);
     gap: var(--space-lg);
   }
-  .news-grid .journal-index-item:first-child {
+  .news-grid .journal-index-item.is-journal-featured {
     grid-template-columns: 1fr;
     min-height: 0;
     padding-bottom: var(--space-3xl);
   }
-  .news-grid .journal-index-item:first-child .journal-index-media,
-  .news-grid .journal-index-item:first-child .journal-index-copy {
+  .news-grid .journal-index-item.is-journal-featured .journal-index-media,
+  .news-grid .journal-index-item.is-journal-featured .journal-index-copy {
     grid-column: 1;
   }
-  .news-grid .journal-index-item:first-child .journal-index-media {
+  .news-grid .journal-index-item.is-journal-featured .journal-index-media {
     grid-row: 1;
   }
-  .news-grid .journal-index-item:first-child .journal-index-copy {
+  .news-grid .journal-index-item.is-journal-featured .journal-index-copy {
     grid-row: 2;
   }
   .journal-index-copy {
     grid-template-columns: 1fr;
     gap: var(--space-sm);
   }
-  .news-grid .journal-index-item:first-child .journal-index-copy h1 {
+  .news-grid .journal-index-item.is-journal-featured .journal-index-copy h3 {
     margin-top: var(--space-lg);
   }
 }
@@ -396,11 +393,11 @@
   .journal-index-filters button {
     flex: 0 0 auto;
   }
-  .news-grid .journal-index-item:not(:first-child) {
+  .news-grid .journal-index-item:not(.is-journal-featured) {
     grid-template-columns: minmax(0, 1fr) 6rem;
     gap: var(--space-md);
   }
-  .news-grid .journal-index-item:not(:first-child) .journal-index-teaser {
+  .news-grid .journal-index-item:not(.is-journal-featured) .journal-index-teaser {
     display: none;
   }
 }

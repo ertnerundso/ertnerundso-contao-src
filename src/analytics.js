@@ -14,7 +14,8 @@ export function hasAnalyticsConsent(hostname, cookieScript, config) {
 export function initAnalytics(runtime) {
   const { config, listen } = runtime;
   const settings = config.analytics;
-  if (!settings.hosts.includes(window.location.hostname)) return;
+  if (document.querySelector(config.preview.selector) ||
+      !settings.hosts.includes(window.location.hostname)) return;
 
   const track = (name) => {
     if (!hasAnalyticsConsent(window.location.hostname, window.CookieScript, settings)) return;
@@ -40,7 +41,7 @@ export function initAnalytics(runtime) {
       track(settings.events.emailClick);
     } else if (
       url.origin === window.location.origin &&
-      (url.pathname === '/kontakt/' || url.pathname === '/en/kontakt/' ||
+      (['/kontakt', '/en/kontakt'].includes(url.pathname.replace(/\/+$/, '')) ||
         url.hash === '#contact')
     ) {
       track(settings.events.contactIntent);

@@ -1,0 +1,8 @@
+{% extends '@Contao/content_element/text.html.twig' %}
+
+{# Der Inhalt bleibt im CMS editierbar und erscheint nur beim gewählten Anliegen. #}
+{% block wrapper %}
+    {% if app.request.query.get('anliegen') == 'storyboard' %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

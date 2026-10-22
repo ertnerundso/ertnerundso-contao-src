@@ -75,11 +75,14 @@ export const config = {
   assets: {
     manualBookPoster: '/files/site/montage-book-poster.jpg',
   },
+  preview: { selector: 'html[data-site-preview="true"]' },
   contact: {
     endpoint: 'https://forms.ertnerundso.de/api/contact',
     turnstileScript: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
     turnstileSiteKey: '0x4AAAAAADqKNDGl_9CgNW_W',
     privacyPath: '/datenschutz/',
+    intentParameter: 'anliegen',
+    storyboardIntent: 'storyboard',
   },
   booking: {
     origin: 'https://cal.ertnerundso.de',

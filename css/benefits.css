@@ -99,7 +99,7 @@ html.showreel-motion .benefits-table {
     grid-template-columns: 1fr;
     margin-top: var(--space-xl);
   }
-  .benefit-column h4 {
+  .benefit-column h3 {
     margin-bottom: var(--space-md);
   }
 }

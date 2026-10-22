@@ -1,6 +1,6 @@
 {% if archive.id in [3, 4] %}
     {% set isEnglish = archive.id == 4 %}
-    <article class="news-card journal-index-item" data-journal-title="{{ headline|e('html_attr') }}">
+    <article class="news-card journal-index-item" data-journal-topic="{{ eoTopic|default('visuals')|e('html_attr') }}" data-journal-featured="{{ featured|default(false) ? '1' : '0' }}">
         <div class="journal-index-media">
             {% if addImage %}
                 {{ include('@Contao/image.html.twig') }}
@@ -14,11 +14,7 @@
             {% if date|default('') %}
                 <p class="micro journal-index-date"><time{% if datetime|default('') %} datetime="{{ datetime }}"{% endif %}>{{ datetime|default('') ? datetime|date('d.m.Y') : date }}</time></p>
             {% endif %}
-            {% if count|default(0) == 1 %}
-                <h1>{{ linkHeadline|sanitize_html('contao') }}</h1>
-            {% else %}
-                <h3>{{ linkHeadline|sanitize_html('contao') }}</h3>
-            {% endif %}
+            <h3>{{ linkHeadline|sanitize_html('contao') }}</h3>
             {% if teaser|default('') %}<p class="journal-index-teaser">{{ teaser|striptags|u.truncate(220, '…') }}</p>{% endif %}
             <a class="button btn--secondary journal-index-read" href="{{ link }}" aria-label="{{ isEnglish ? 'Read article' : 'Artikel lesen' }}: {{ headline|e('html_attr') }}">{{ isEnglish ? 'Read article' : 'Artikel lesen' }}</a>
         </div>

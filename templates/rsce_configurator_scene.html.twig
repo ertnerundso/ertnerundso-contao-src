@@ -1,3 +1,5 @@
+{% set isEnglish = app.request.pathInfo == '/en' or app.request.pathInfo starts with '/en/' %}
+{% set defaultImageAlt = isEnglish ? 'Product configurator interface on a laptop.' : 'Oberfläche eines Produktkonfigurators auf einem Laptop.' %}
 <section class="configurator-scene" aria-labelledby="configurator-scene-title">
     <div class="configurator-scene-sticky">
         <div class="configurator-scene-heading shell">
@@ -10,7 +12,7 @@
         </div>
         <div class="configurator-scene-content shell">
             <div class="configurator-scene-media">
-                <img class="configurator-scene-still" src="https://ertnerundso.github.io/ertnerundso-contao-src/assets/images/configurator-laptop-poster.jpg" width="1280" height="1024" alt="{{ sceneTitle|e('html_attr') }}" loading="lazy" decoding="async">
+                <img class="configurator-scene-still" src="https://ertnerundso.github.io/ertnerundso-contao-src/assets/images/configurator-laptop-poster.jpg" width="1280" height="1024" alt="{{ imageAlt|default(defaultImageAlt)|e('html_attr') }}" loading="lazy" decoding="async">
                 <video class="configurator-scene-video" muted playsinline preload="metadata" poster="https://ertnerundso.github.io/ertnerundso-contao-src/assets/images/configurator-laptop-start.jpg" aria-hidden="true" tabindex="-1">
                     <source src="https://ertnerundso.github.io/ertnerundso-contao-src/assets/videos/configurator-laptop.mp4" type="video/mp4">
                 </video>
