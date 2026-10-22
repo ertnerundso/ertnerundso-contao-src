@@ -105,3 +105,120 @@ test('withdrawal stops subsequent events without collecting field values', async
   await page.locator('#booking').click();
   expect(await page.evaluate(() => window.umamiEvents)).toEqual(['contact_intent']);
 });
+
+// Echte Browsernavigation mit persistierter CMP-Nachbildung, ohne Drittanfragen.
+async function startConsentLifecycle(page, initial, { preview = false, hostname = 'ertnerundso.com' } = {}) {
+  await page.addInitScript((consent) => {
+    if (!sessionStorage.getItem('cmp-fixture-initialized')) {
+      sessionStorage.setItem('cmp-fixture-initialized', '1');
+      sessionStorage.setItem('cmp-fixture-choice', JSON.stringify(consent));
+    }
+    const loads = Number(sessionStorage.getItem('cmp-fixture-loads') || 0) + 1;
+    sessionStorage.setItem('cmp-fixture-loads', String(loads));
+  }, initial);
+  await page.route('**/*', async (route) => {
+    const url = new URL(route.request().url());
+    if (['/src/analytics.js', '/src/config.js'].includes(url.pathname)) {
+      return route.fulfill({ contentType: 'text/javascript', body: await readFile(new URL('..' + url.pathname, import.meta.url), 'utf8') });
+    }
+    expect(url.hostname).toBe(hostname);
+    return route.fulfill({ contentType: 'text/html', body: `<!doctype html>
+      <html${preview ? ' data-site-preview="true"' : ''}><body><script type="module">
+        import { config } from '/src/config.js';
+        import { initAnalytics } from '/src/analytics.js';
+        window.fixtureState = JSON.parse(sessionStorage.getItem('cmp-fixture-choice'));
+        window.fixtureReadError = false;
+        window.CookieScript = { instance: { currentState() {
+          if (window.fixtureReadError) throw new Error('CMP not ready');
+          return window.fixtureState;
+        } } };
+        window.fixtureChoice = (state, events) => {
+          // Wie eine CMP: Ereignis zuerst, danach Wahl schreiben, bevor Task endet.
+          for (const name of events) window.dispatchEvent(new Event(name));
+          window.fixtureState = state;
+          sessionStorage.setItem('cmp-fixture-choice', JSON.stringify(state));
+        };
+        initAnalytics({ config, listen: (target, type, handler) => target.addEventListener(type, handler) });
+        window.dispatchEvent(new Event('CookieScriptLoaded'));
+        window.fixtureReady = true;
+      </script></body></html>` });
+  });
+  await page.goto('https://' + hostname + '/');
+  await expect.poll(() => page.evaluate(() => window.fixtureReady)).toBe(true);
+}
+
+const granted = (categories) => ({ action: 'accept', categories: ['strict', ...categories] });
+const rejected = { action: 'reject', categories: ['strict'] };
+async function loads(page) {
+  return page.evaluate(() => Number(sessionStorage.getItem('cmp-fixture-loads')));
+}
+async function choice(page, state, events) {
+  await page.evaluate(({ state, events }) => window.fixtureChoice(state, events), { state, events });
+}
+async function settle(page) {
+  // Zwei nachgelagerte Tasks sichern den Negativfall ohne CMP-/Netzwerk-Timing.
+  await page.evaluate(() => new Promise((resolve) => setTimeout(() => setTimeout(resolve, 0), 0)));
+}
+
+for (const category of ['performance', 'targeting']) {
+  test(`${category} withdrawal reloads once after persistence and stays rejected on the new page`, async ({ page }) => {
+    await startConsentLifecycle(page, granted([category]));
+    await settle(page);
+    expect(await loads(page)).toBe(1);
+    await Promise.all([
+      page.waitForEvent('load'),
+      choice(page, rejected, ['CookieScriptReject', 'CookieScriptAccept', 'CookieScriptReject']),
+    ]);
+    await expect.poll(() => page.evaluate(() => window.fixtureReady)).toBe(true);
+    expect(await loads(page)).toBe(2);
+    expect(await page.evaluate(() => window.fixtureState)).toEqual(rejected);
+    await choice(page, rejected, ['CookieScriptLoaded', 'CookieScriptReject', 'CookieScriptReject']);
+    await settle(page);
+    expect(await loads(page)).toBe(2);
+  });
+}
+
+test('partial acceptance reloads on targeting withdrawal even when performance stays granted', async ({ page }) => {
+  await startConsentLifecycle(page, granted(['performance', 'targeting']));
+  await Promise.all([page.waitForEvent('load'), choice(page, granted(['performance']), ['CookieScriptAccept'])]);
+  await expect.poll(() => page.evaluate(() => window.fixtureReady)).toBe(true);
+  await settle(page);
+  expect(await loads(page)).toBe(2);
+  expect(await page.evaluate(() => window.fixtureState.categories)).toEqual(['strict', 'performance']);
+});
+
+test('initial unknown/rejected, grants and repeated official category events never reload', async ({ page }) => {
+  await startConsentLifecycle(page, null);
+  await settle(page);
+  await choice(page, rejected, ['CookieScriptLoaded', 'CookieScriptReject']);
+  await settle(page);
+  await choice(page, granted(['performance', 'targeting']), ['CookieScriptAcceptAll', 'CookieScriptCategory-performance', 'CookieScriptCategory-targeting']);
+  await settle(page);
+  await choice(page, granted(['performance', 'targeting']), ['CookieScriptLoaded', 'CookieScriptAccept', 'CookieScriptCategory-targeting']);
+  await settle(page);
+  expect(await loads(page)).toBe(1);
+});
+
+test('CMP read errors neither reload nor forget the last valid granted choice', async ({ page }) => {
+  await startConsentLifecycle(page, granted(['performance']));
+  await page.evaluate(() => {
+    window.fixtureReadError = true;
+    window.dispatchEvent(new Event('CookieScriptReject'));
+  });
+  await settle(page);
+  expect(await loads(page)).toBe(1);
+  await page.evaluate(() => { window.fixtureReadError = false; });
+  await Promise.all([page.waitForEvent('load'), choice(page, rejected, ['CookieScriptReject'])]);
+  await expect.poll(() => page.evaluate(() => window.fixtureReady)).toBe(true);
+  await settle(page);
+  expect(await loads(page)).toBe(2);
+});
+
+for (const mode of [{ preview: true }, { hostname: 'staging.ertnerundso.de' }]) {
+  test(`${mode.preview ? 'preview marker' : 'non-live hostname'} never reloads on consent withdrawal`, async ({ page }) => {
+    await startConsentLifecycle(page, granted(['performance', 'targeting']), mode);
+    await choice(page, rejected, ['CookieScriptReject']);
+    await settle(page);
+    expect(await loads(page)).toBe(1);
+  });
+}

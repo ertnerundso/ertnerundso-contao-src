@@ -95,6 +95,15 @@ export const config = {
     hosts: ['ertnerundso.de', 'ertnerundso.com'],
     googleMeasurementId: 'G-BFB4EHKRX2',
     consentCategory: 'performance',
+    // Offizielle Window-Ereignisse; die naechste Task liest die gespeicherte Wahl.
+    withdrawal: {
+      categories: ['performance', 'targeting'],
+      events: [
+        'CookieScriptLoaded', 'CookieScriptAccept', 'CookieScriptAcceptAll',
+        'CookieScriptReject', 'CookieScriptCategory-performance', 'CookieScriptCategory-targeting',
+      ],
+      settleDelay: 0,
+    },
     events: {
       contactIntent: 'contact_intent',
       contactSuccess: 'contact_submit_success',
