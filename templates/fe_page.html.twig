@@ -64,7 +64,7 @@ height="0" width="0" style="display:none;visibility:hidden" title="Google Tag Ma
 <!-- End Google Tag Manager (noscript) -->
 {% endif %}
 {{ contao_sections('top') }}
-<a class="skip-link" href="{{ currentPath }}#main">{{ english ? 'Skip to content' : 'Zum Inhalt' }}</a>
+<a class="skip-link" href="{{ app.request.requestUri }}#main">{{ english ? 'Skip to content' : 'Zum Inhalt' }}</a>
 <header class="site-header">
     <div class="shell header-inner">
         <a class="brand" href="{{ english ? '/en/' : '/' }}" aria-label="ERTNER&SO {{ english ? 'home' : 'Startseite' }}"><img src="{{ releasePath }}/assets/images/logo.svg" alt="ERTNER&SO" width="148" height="15"></a>
