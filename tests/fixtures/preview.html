@@ -1,0 +1,16 @@
+<!doctype html><html lang="de" data-site-preview="true"><head><meta charset="utf-8"></head><body><main>
+<div class="contact-form"><form><div class="formbody">
+<label>E-Mail<input name="email" type="email" required></label>
+<label>Nachricht<textarea name="message"></textarea></label>
+<input id="consent" name="consent" type="checkbox" required><label for="consent">Datenschutz</label>
+<div class="widget"><button type="submit">Absenden</button></div>
+</div></form></div><div data-cal-inline></div><a href="https://cal.ertnerundso.de/eunds/30min">Buchen</a>
+</main><script type="module">
+import { config } from '/src/config.js';
+import { initForms } from '/src/forms.js';
+import { initBooking } from '/src/booking.js';
+const runtime = {config, listen: (node, event, callback, options) => node.addEventListener(event, callback, options)};
+initForms(runtime);initBooking(runtime);
+document.addEventListener('eo:contact-success', () => { window.liveSuccess = true; });
+window.previewReady = true;
+</script></body></html>

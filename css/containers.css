@@ -29,7 +29,7 @@
   min-height: 2.24em;
   margin: 0 0 var(--space-md);
 }
-.benefit-column h4 {
+.benefit-column h3 {
   margin: 0 0 var(--space-md);
 }
 .journal-row,

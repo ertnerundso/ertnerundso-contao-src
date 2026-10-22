@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <base href="/">
+  <title>Unterseite mit Skiplink</title>
+  <style>
+    .skip-link { position: absolute; top: -100px; }
+    .skip-link:focus { top: 0; }
+    main { margin-top: 1200px; min-height: 1200px; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="/tests/fixtures/skip-link.html#main">Zum Inhalt</a>
+  <header class="site-header"><a id="header-link" href="/">Studio</a></header>
+  <main class="site-main" id="main" tabindex="-1">
+    <h1>Inhalt der Unterseite</h1>
+    <a id="content-link" href="/tests/fixtures/skip-link.html#details">Erster Inhaltslink</a>
+    <div id="details">Weitere Informationen</div>
+  </main>
+  <script type="module" src="/dist/site.js"></script>
+</body>
+</html>

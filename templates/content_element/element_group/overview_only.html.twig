@@ -1,0 +1,8 @@
+{% extends '@Contao/content_element/element_group.html.twig' %}
+
+{# Gemeinsame Übersichtsbausteine gehören nicht in den DOM einer Readerseite. #}
+{% block wrapper %}
+    {% if not app.request.attributes.get('parameters') %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

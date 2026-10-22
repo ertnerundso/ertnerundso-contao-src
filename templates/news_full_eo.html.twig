@@ -1,5 +1,15 @@
 {% set articleText = text.invoke() %}
 
+{# Titel und Einleitung werden einmalig in den Nachrichten-Stammdaten gepflegt. #}
+{% macro intro(headline, teaser) %}
+    <div class="news-intro content-text">
+        <h1>{{ headline }}</h1>
+        {% if teaser|default('') %}
+            <div class="rte">{{ teaser|sanitize_html('contao') }}</div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
 {% if archive.id in [3, 4] %}
     {% set isEnglish = archive.id == 4 %}
     {% set journalUrl = isEnglish ? '/en/journal/' : '/journal/' %}
@@ -21,6 +31,7 @@
                 <div class="journal-index-media-fallback" aria-hidden="true"><span>ERTNER&SO</span><strong>JOURNAL</strong></div>
             {% endif %}
         </div>
+        {{ _self.intro(headline, teaser|default('')) }}
         {{ articleText|raw }}
     </div>
 
@@ -49,6 +60,7 @@
 </article>
 {% else %}
 <div class="layout_full news-detail block">
+    {{ _self.intro(headline, teaser|default('')) }}
     {{ articleText|raw }}
 </div>
 {% endif %}

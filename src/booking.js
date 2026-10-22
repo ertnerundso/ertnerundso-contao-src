@@ -4,6 +4,18 @@ import { enhanceButton } from './buttons.js';
 export function initBooking(runtime) {
   const { config, motion } = runtime;
   const booking = document.querySelector('[data-cal-inline]');
+  if (document.querySelector(config.preview.selector)) {
+    const message = document.createElement('p');
+    message.textContent = document.documentElement.lang === 'en'
+      ? 'Preview: the calendar is disabled. No bookings are made.'
+      : 'Vorschau: Der Kalender ist deaktiviert. Es werden keine Termine gebucht.';
+    booking?.replaceChildren(message);
+    document.querySelectorAll('a[href]').forEach((link) => {
+      if (new URL(link.href, window.location.href).origin !== config.booking.origin) return;
+      runtime.listen(link, 'click', (event) => event.preventDefault());
+    });
+    return;
+  }
   if (booking) {
     const origin = config.booking.origin;
     const queue = (...args) => window.Cal.q.push(args);

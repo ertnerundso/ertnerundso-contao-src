@@ -75,11 +75,14 @@ export const config = {
   assets: {
     manualBookPoster: '/files/site/montage-book-poster.jpg',
   },
+  preview: { selector: 'html[data-site-preview="true"]' },
   contact: {
     endpoint: 'https://forms.ertnerundso.de/api/contact',
     turnstileScript: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
     turnstileSiteKey: '0x4AAAAAADqKNDGl_9CgNW_W',
     privacyPath: '/datenschutz/',
+    intentParameter: 'anliegen',
+    storyboardIntent: 'storyboard',
   },
   booking: {
     origin: 'https://cal.ertnerundso.de',
@@ -92,6 +95,15 @@ export const config = {
     hosts: ['ertnerundso.de', 'ertnerundso.com'],
     googleMeasurementId: 'G-BFB4EHKRX2',
     consentCategory: 'performance',
+    // Offizielle Window-Ereignisse; die naechste Task liest die gespeicherte Wahl.
+    withdrawal: {
+      categories: ['performance', 'targeting'],
+      events: [
+        'CookieScriptLoaded', 'CookieScriptAccept', 'CookieScriptAcceptAll',
+        'CookieScriptReject', 'CookieScriptCategory-performance', 'CookieScriptCategory-targeting',
+      ],
+      settleDelay: 0,
+    },
     events: {
       contactIntent: 'contact_intent',
       contactSuccess: 'contact_submit_success',

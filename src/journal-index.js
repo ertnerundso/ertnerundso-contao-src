@@ -5,20 +5,18 @@ export function initJournalIndex(runtime) {
   if (!list) return;
   const articles = [...list.querySelectorAll(':scope > .journal-index-item')];
   if (!articles.length) return;
-  const [featured, ...entries] = articles;
+  const featured = articles.find(article => article.dataset.journalFeatured === '1');
+  const entries = articles.filter(article => article !== featured);
+  const originalFeaturedSibling = featured?.nextSibling;
+  if (featured) {
+    featured.classList.add('is-journal-featured');
+    list.prepend(featured);
+  }
 
   const english = document.documentElement.lang === 'en';
   const labels = english
     ? { all: 'All', visuals: '3D & CGI', motion: 'Film & animation', assembly: 'Assembly', more: 'More articles', count: 'articles' }
     : { all: 'Alle', visuals: '3D & CGI', motion: 'Film & Animation', assembly: 'Montage', more: 'Weitere Artikel', count: 'Artikel' };
-  const topicFor = (title) => {
-    const normalized = title.toLocaleLowerCase(english ? 'en' : 'de');
-    if (/montage|assembly/.test(normalized)) return 'assembly';
-    if (/animation|film|video/.test(normalized)) return 'motion';
-    return 'visuals';
-  };
-  for (const article of entries) article.dataset.journalTopic = topicFor(article.dataset.journalTitle || '');
-
   const toolbar = document.createElement('div');
   toolbar.className = 'journal-index-toolbar';
   const filters = document.createElement('div');
@@ -43,7 +41,7 @@ export function initJournalIndex(runtime) {
     entries.forEach((article) => {
       article.hidden = !matching.includes(article) || matching.indexOf(article) >= visibleCount;
     });
-    featured.hidden = false;
+    if (featured) featured.hidden = false;
     status.textContent = `${Math.min(visibleCount, matching.length)} / ${matching.length} ${labels.count}`;
     more.hidden = matching.length <= visibleCount;
     for (const [topic, button] of buttons) button.setAttribute('aria-pressed', String(topic === selected));
@@ -66,15 +64,19 @@ export function initJournalIndex(runtime) {
     visibleCount += runtime.config.journalIndex.pageSize;
     render();
   });
-  featured.after(toolbar);
+  if (featured) featured.after(toolbar);
+  else list.prepend(toolbar);
   list.after(more);
   render();
   runtime.cleanup(() => {
     toolbar.remove();
     more.remove();
+    if (featured) {
+      featured.classList.remove('is-journal-featured');
+      list.insertBefore(featured, originalFeaturedSibling);
+    }
     for (const article of articles) {
       article.hidden = false;
-      delete article.dataset.journalTopic;
     }
   });
 }

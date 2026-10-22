@@ -558,14 +558,14 @@
     font-weight: var(--font-label-weight);
     line-height: var(--font-label-line-height);
   }
-  .news-grid .journal-index-item:first-child .journal-index-media-fallback strong,
+  .news-grid .journal-index-item.is-journal-featured .journal-index-media-fallback strong,
   .news-detail-hero .journal-index-media-fallback strong {
     font-family: var(--font-h1-family);
     font-size: var(--font-h1-size);
     font-weight: var(--font-h1-weight);
     line-height: var(--font-h1-line-height);
   }
-  .news-grid .journal-index-copy :is(h1, h3) {
+  .news-grid .journal-index-copy h3 {
     hyphens: auto;
     overflow-wrap: anywhere;
   }
@@ -596,7 +596,7 @@
     hyphens: auto;
     overflow-wrap: anywhere;
   }
-  .news-grid .news-card :is(h1, h3) a {
+  .news-grid .news-card h3 a {
     text-decoration: none;
   }
   /* --- KONTAKT UND FRAGEN --- */
@@ -642,9 +642,6 @@
   .content-section h3 {
     hyphens: auto;
     overflow-wrap: anywhere;
-  }
-  .news-detail-body > .news-intro h1 {
-    hyphens: none;
   }
   .split-line {
     white-space: normal;

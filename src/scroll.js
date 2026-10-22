@@ -1,5 +1,38 @@
 /* SCROLLEN: Lenis und interne Sprunglinks. Verhalten in config.js; Zeit in motion.css. */
 import Lenis from 'lenis';
+
+// Der Tastatur-Sprung gehört nicht zur Bewegungsinitialisierung: Er funktioniert auch ohne Lenis.
+export function initSkipLink(runtime) {
+  const skip = document.querySelector('.skip-link');
+  const main = document.getElementById('main');
+  if (!skip || !main) return;
+  const originalHref = skip.getAttribute('href');
+  const localHref = `${window.location.pathname}${window.location.search}#main`;
+  skip.setAttribute('href', localHref);
+  let temporaryTabindex = false;
+  const restoreTabindex = () => {
+    if (temporaryTabindex && main.getAttribute('tabindex') === '-1') main.removeAttribute('tabindex');
+    temporaryTabindex = false;
+  };
+  runtime.listen(main, 'blur', restoreTabindex);
+  runtime.listen(skip, 'click', (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (!main.hasAttribute('tabindex')) {
+      main.setAttribute('tabindex', '-1');
+      temporaryTabindex = true;
+    }
+    main.focus({ preventScroll: true });
+    if (runtime.lenis) runtime.lenis.scrollTo(main, { offset: -runtime.headerHeight });
+    else main.scrollIntoView({ block: 'start', behavior: 'auto' });
+  });
+  runtime.cleanup(() => {
+    restoreTabindex();
+    if (originalHref === null) skip.removeAttribute('href');
+    else skip.setAttribute('href', originalHref);
+  });
+}
+
 export function initScroll(runtime) {
   const { gsap, ScrollTrigger, config, motion, listen } = runtime;
   if (runtime.reduceMotion || runtime.coarsePointer) return;
@@ -20,7 +53,7 @@ export function initScroll(runtime) {
     lenis.destroy();
     if (runtime.lenis === lenis) runtime.lenis = null;
   });
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) =>
+  document.querySelectorAll('a[href^="#"]:not(.skip-link)').forEach((anchor) =>
     listen(anchor, 'click', (event) => {
       let id;
       try {

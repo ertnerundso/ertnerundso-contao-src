@@ -2,7 +2,7 @@
    Einstellungen in config.js; Gestaltung in den CSS-Systemdateien.
    Fehler eines optionalen Bereichs dürfen die übrige Seite nicht stoppen. */
 import { createRuntime } from './runtime.js';
-import { initScroll } from './scroll.js';
+import { initScroll, initSkipLink } from './scroll.js';
 import { initHeader } from './header.js';
 import { initNavigation } from './navigation.js';
 import { initJournal } from './journal.js';
@@ -31,6 +31,7 @@ const motionModules = new Set([
   initPointer,
 ]);
 for (const initialize of [
+  initSkipLink,
   initScroll,
   initHeader,
   initNavigation,
