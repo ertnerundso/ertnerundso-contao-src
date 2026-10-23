@@ -1,0 +1,18 @@
+journal_api_create:
+    path: /_automation/journal
+    controller: App\JournalApiController::create
+    methods: [POST]
+
+journal_api_update:
+    path: /_automation/journal/{id}
+    controller: App\JournalApiController::update
+    methods: [PATCH]
+    requirements:
+        id: '\d+'
+
+journal_api_publish:
+    path: /_automation/journal/{id}/publish
+    controller: App\JournalApiController::publish
+    methods: [POST]
+    requirements:
+        id: '\d+'
