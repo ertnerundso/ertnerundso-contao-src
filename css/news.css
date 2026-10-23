@@ -236,7 +236,10 @@
 .news-grid .journal-index-media img {
   display: block;
   width: 100%;
-  aspect-ratio: 1.6;
+  /* Contao setzt die Originalhöhe ins img-Tag; ohne height:auto greift aspect-ratio nicht. */
+  height: auto;
+  /* Jan, 23.10.2026: Listenbilder dreimal so hoch wie 16:10 (1.6 / 3). */
+  aspect-ratio: 0.5333;
   object-fit: cover;
 }
 .news-grid .journal-index-item.is-journal-featured .journal-index-media img {
@@ -247,7 +250,7 @@
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
-  aspect-ratio: 1.6;
+  aspect-ratio: 0.5333;
   padding: var(--space-sm);
 }
 .news-grid .journal-index-item.is-journal-featured .journal-index-media-fallback {
