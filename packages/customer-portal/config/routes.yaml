@@ -1,0 +1,3 @@
+eunds_portal:
+  resource: ../src/Controller/
+  type: attribute

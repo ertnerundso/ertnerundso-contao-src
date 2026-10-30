@@ -1,0 +1,13 @@
+{
+  "name": "ertnerundso/contao-customer-portal-bundle",
+  "description": "Natives, mandantengetrenntes Kundenportal für ERTNER&SO",
+  "type": "contao-bundle",
+  "license": "proprietary",
+  "require": {
+    "php": "^8.2",
+    "contao/core-bundle": "^6.0",
+    "contao/manager-plugin": "^2.0"
+  },
+  "autoload": {"psr-4": {"Ertnerundso\\CustomerPortal\\": "src/"}},
+  "extra": {"contao-manager-plugin": "Ertnerundso\\CustomerPortal\\ContaoManager\\Plugin"}
+}

@@ -1,0 +1,8 @@
+{% extends '@Contao/block_unsearchable.html.twig' %}
+{% block content %}
+  {% if portalData %}
+    <div class="portal">
+      {% include '@ErtnerundsoCustomerPortal/workspace.html.twig' with portalData|merge({mainTag: 'section'}) only %}
+    </div>
+  {% else %}Kundenportal: geschützte Übersicht der angemeldeten Firma.{% endif %}
+{% endblock %}

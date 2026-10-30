@@ -1,0 +1,6 @@
+{% extends '@Contao/content_element/_base.html.twig' %}
+{% block content %}
+  <div class="portal">
+    {% include '@ErtnerundsoCustomerPortal/workspace.html.twig' with portalData|merge({mainTag: 'section'}) only %}
+  </div>
+{% endblock %}

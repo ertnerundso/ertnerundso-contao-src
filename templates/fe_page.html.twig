@@ -3,7 +3,8 @@
 {# Ein vollständiges Release bleibt lokal und wird zusammen mit diesem Template ausgeliefert. #}
 {% set releasePath = '/files/site/releases/polish-20261022' %}
 {# Bestehendes Tracking samt CookieScript-Zustimmung aus der alten Website; nur auf den Live-Domains. #}
-{% set trackingEnabled = app.request.host in ['ertnerundso.com', 'ertnerundso.de'] %}
+{% set customerArea = currentPath == '/kundenbereich' or currentPath starts with '/kundenbereich/' or currentPath == '/kundenlogin' or currentPath starts with '/kundenlogin/' %}
+{% set trackingEnabled = app.request.host in ['ertnerundso.com', 'ertnerundso.de'] and not customerArea %}
 {% set tagManagerId = 'GTM-M2FZPTG2' %}
 {% set english = currentPath == '/en' or currentPath starts with '/en/' %}
 {# Explizite Paare für unterschiedliche DE/EN-Aliase; Bestands-Reader verwenden gleiche Aliase. #}
