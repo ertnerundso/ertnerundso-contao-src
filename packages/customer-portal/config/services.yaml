@@ -1,0 +1,18 @@
+parameters:
+  eunds_portal.website_asset_base: '/files/site/releases/polish-20261022'
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  Ertnerundso\CustomerPortal\Security\TenantContext: ~
+  Ertnerundso\CustomerPortal\Repository\PortalRepository: ~
+  Ertnerundso\CustomerPortal\Controller\PortalController:
+    arguments:
+      $websiteAssetBase: '%env(default:eunds_portal.website_asset_base:PORTAL_WEBSITE_ASSET_BASE)%'
+    tags: ['controller.service_arguments']
+  Ertnerundso\CustomerPortal\EventSubscriber\PrivateResponseSubscriber: ~
+  Ertnerundso\CustomerPortal\Controller\PortalContentElementController:
+    public: true
+    tags: ['controller.service_arguments']

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{% block title %}Kundenportal{% endblock %} · ERTNER&amp;SO</title>
+  <link rel="stylesheet" href="{{ assetBase }}/site.css">
+  <link rel="stylesheet" href="{{ assetBase }}/css/portal.css">
+  <script src="/bundles/ertnerundsocustomerportal/portal.js" defer></script>
+</head>
+<body class="portal">
+  <a class="skip-link" href="#portal-main">Zum Inhalt</a>
+  {% block body %}{% endblock %}
+</body>
+</html>

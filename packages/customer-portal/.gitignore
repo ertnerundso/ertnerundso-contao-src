@@ -1,0 +1,5 @@
+/vendor/
+/.env*
+/private/
+/var/
+/test-results/

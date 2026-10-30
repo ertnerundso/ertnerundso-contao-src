@@ -1,0 +1,103 @@
+/* PORTAL / STRUKTUR: verwendet ausschließlich das bestehende Website-Designsystem.
+   Keine neuen Farb-, Schrift-, Button- oder Kartenvarianten. */
+.portal-layout {
+  display: grid;
+  grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
+  min-height: 100svh;
+}
+.portal-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-2xl) var(--space-xl);
+  align-self: start;
+  position: sticky;
+  top: 0;
+  max-height: 100svh;
+  overflow-y: auto;
+}
+.portal-sidebar nav, .portal-search {
+  display: grid;
+  gap: var(--space-md);
+}
+.portal-sidebar nav {
+  margin-top: var(--space-xl);
+}
+.portal-sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: var(--layout-button-height);
+}
+.portal-search input {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--layout-button-height);
+}
+.portal-identity {
+  margin-top: var(--space-2xl);
+}
+.portal-main {
+  min-width: 0;
+  padding: var(--space-3xl) var(--space-gutter) var(--space-4xl);
+}
+.portal-heading {
+  margin-bottom: var(--space-4xl);
+}
+.portal-heading h1 {
+  margin-block: var(--space-md) var(--space-xl);
+}
+.portal-section + .portal-section {
+  margin-top: var(--space-4xl);
+}
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xl);
+  margin-top: var(--space-2xl);
+}
+.portal .card {
+  min-width: 0;
+}
+.portal .card h3, .portal .card h2 {
+  margin-block: var(--space-md) var(--space-lg);
+}
+.portal-phases, .portal-team, .portal-activity {
+  display: grid;
+  gap: var(--space-md);
+  padding-inline-start: var(--space-lg);
+}
+.portal-access {
+  padding-block: var(--space-5xl);
+}
+.portal-access p {
+  max-width: 60ch;
+  margin-block: var(--space-xl);
+}
+.portal-menu summary {
+  display: none;
+  min-height: var(--layout-button-height);
+}
+@media (max-width: 1000px) {
+  .portal-menu summary {
+    display: list-item;
+  }
+  .portal-layout, .portal-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .portal-sidebar {
+    position: static;
+    max-height: none;
+    padding: var(--space-xl) var(--space-gutter);
+    gap: var(--space-sm);
+  }
+  .portal-main {
+    padding-top: var(--space-xl);
+  }
+  .portal-heading {
+    margin-bottom: var(--space-3xl);
+  }
+  .portal-identity {
+    margin-top: var(--space-xl);
+  }
+}

@@ -1,0 +1,115 @@
+/* Echter Contao-Login im isolierten Labor; Zugangsdaten nur aus privater Datei. */
+import fs from 'node:fs/promises';
+import path from 'node:path';
+const { chromium } = await import(process.env.PORTAL_PLAYWRIGHT_MODULE || '@playwright/test');
+const { accounts } = JSON.parse(await fs.readFile(process.env.PORTAL_TEST_CREDENTIALS, 'utf8'));
+const base = process.env.PORTAL_TEST_URL || 'http://127.0.0.1:3208';
+const output = process.env.PORTAL_TEST_OUTPUT;
+if (!output) throw new Error('PORTAL_TEST_OUTPUT fehlt.');
+await fs.mkdir(output, { recursive: true });
+const browser = await chromium.launch({ headless: true });
+const checks = [];
+const check = (name, result) => { if (!result) throw new Error(name); checks.push(name); };
+const privateResponse = (response) => (response.headers()['cache-control'] || '').includes('no-store');
+const login = async (page, key) => {
+  await page.goto(`${base}/kundenlogin`);
+  await page.locator('input[name="username"]').fill(accounts[key].username);
+  await page.locator('input[name="password"]').fill(accounts[key].password);
+  await Promise.all([page.waitForURL(/\/kundenbereich(?:\?|$)/), page.locator('button[type="submit"], input[type="submit"]').first().click()]);
+};
+try {
+  const guest = await browser.newContext();
+  let response = await guest.request.get(`${base}/kundenbereich/portal`);
+  check('Gast erhält keine Portal-Daten', response.status() === 403 && !(await response.text()).includes('Produktfilm'));
+  check('Gastantwort nicht zwischengespeichert', privateResponse(response));
+  await guest.close();
+
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const page = await context.newPage();
+  const consoleErrors = [];
+  const failedAssets = [];
+  const tracking = [];
+  page.on('pageerror', (error) => consoleErrors.push(error.message));
+  page.on('response', (r) => { if (r.url().includes('/website/') && r.status() >= 400) failedAssets.push(r.url()); });
+  page.on('request', (r) => { if (/googletagmanager|google-analytics|umami|facebook\.net/.test(r.url())) tracking.push(r.url()); });
+  await login(page, 'A');
+  check('Dashboard als natives CMS-Inhaltselement eingebunden', await page.locator('.content-customer_portal, .content-customer-portal, .portal-layout').count() > 0 && await page.getByRole('heading', { name: 'Übersicht', exact: true }).count() === 1);
+  response = await page.goto(`${base}/kundenbereich/portal`);
+  await page.evaluate(() => document.fonts.ready);
+  check('Portal nach nativem Login erreichbar', response.status() === 200);
+  check('Portal mit privaten Cache-Headern', privateResponse(response));
+  check('Eigener Firmenname sichtbar', await page.getByText('Musterkunde Alpha', { exact: true }).count() > 0);
+  check('Fremde Projektdaten fehlen', !(await page.locator('body').innerText()).includes('Geheimprojekt Beta'));
+  check('Wartet-auf-Sie-Zähler stimmt', (await page.getByRole('link', { name: /Prüfen/ }).innerText()).replace(/\s+/g, ' ').trim() === 'Prüfen (1)');
+  check('Genau eine Primäraktion', await page.locator('.btn--primary').count() === 1);
+  check('Desktop ohne horizontalen Überlauf', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.keyboard.press('Control+k');
+  check('Strg+K fokussiert Suche', await page.locator('#portal-search').evaluate((el) => el === document.activeElement));
+  await page.screenshot({ path: path.join(output, 'portal-desktop.png'), fullPage: true });
+  response = await context.request.get(`${base}/kundenbereich/api/projekte/${accounts.B.projectId}`);
+  check('Fremde Projekt-ID ergibt 404', response.status() === 404);
+  check('Fehlerantwort nicht zwischengespeichert', privateResponse(response));
+  response = await context.request.get(`${base}/kundenbereich/api/projekte/${accounts.A.projectId}`);
+  const project = await response.json();
+  check('Eigene API liefert nur freigegebene Felder', response.status() === 200 && project.phases.length === 6 && !('onedrive_ordner_id' in project) && !('firma_id' in project));
+  for (const view of ['projekte', 'pruefen', 'abgaben', 'team']) {
+    response = await page.goto(`${base}/kundenbereich/portal/${view}`);
+    check(`Ansicht ${view} erreichbar`, response.status() === 200 && await page.locator('h1').count() === 1);
+    check(`Ansicht ${view} ohne Fremddaten`, !(await page.locator('body').innerText()).includes('Geheimprojekt Beta'));
+  }
+  await page.goto(`${base}/kundenbereich/portal/projekte?q=Geheim`);
+  check('Suche durchsucht keine fremde Firma', await page.getByText('Kein Projekt mit diesem Namen gefunden.').count() === 1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${base}/kundenbereich/portal`);
+  await page.evaluate(() => document.fonts.ready);
+  check('Mobile Navigation eingeklappt', !(await page.locator('.portal-menu').evaluate((el) => el.open)));
+  check('Mobil ohne horizontalen Überlauf', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.locator('summary').click();
+  check('Mobiles Menü erreichbar', await page.getByRole('link', { name: /Team und Einstellungen/ }).isVisible());
+  await page.locator('summary').click();
+  await page.screenshot({ path: path.join(output, 'portal-mobile.png'), fullPage: true });
+  check('Keine JavaScript-Laufzeitfehler', consoleErrors.length === 0);
+  check('Alle Designsystem-Assets geladen', failedAssets.length === 0);
+  check('Keine Analytics im Portal', tracking.length === 0);
+  await page.goto(`${base}/kundenbereich`);
+  await Promise.all([page.waitForURL((url) => !url.pathname.startsWith('/kundenbereich')), page.locator('button[type="submit"], input[type="submit"]').first().click()]);
+  response = await context.request.get(`${base}/kundenbereich/portal`);
+  check('Nach nativem Logout wieder ausgeschlossen', response.status() === 403);
+  await context.close();
+
+  const beta = await browser.newContext();
+  const betaPage = await beta.newPage();
+  await login(betaPage, 'B');
+  response = await beta.request.get(`${base}/kundenbereich/api/projekte/${accounts.A.projectId}`);
+  check('Firma B erhält ebenfalls keine Daten von Firma A', response.status() === 404);
+  await betaPage.goto(`${base}/kundenbereich/portal`);
+  check('Mitleser-Rolle sichtbar', await betaPage.getByText('Mitleser', { exact: true }).count() === 1);
+  await beta.close();
+
+  const unmapped = await browser.newContext();
+  const unmappedPage = await unmapped.newPage();
+  await login(unmappedPage, 'unmapped');
+  response = await unmappedPage.goto(`${base}/kundenbereich/portal`);
+  check('Demo ohne Firmenzuordnung bleibt ausgeschlossen', response.status() === 403);
+  check('Keine Daten im Demo-Fehlertext', !(await unmappedPage.locator('body').innerText()).includes('Produktfilm'));
+  await unmapped.close();
+  const admin = await browser.newContext();
+  const adminPage = await admin.newPage();
+  await adminPage.goto(`${base}/contao/login`);
+  await adminPage.locator('input[name="username"]').fill(accounts.admin.username);
+  await adminPage.locator('input[name="password"]').fill(accounts.admin.password);
+  await Promise.all([adminPage.waitForURL((url) => !url.pathname.endsWith('/login')), adminPage.locator('button[type="submit"], input[type="submit"]').first().click()]);
+  response = await adminPage.goto(`${base}/contao?do=portal_firma`);
+  check('Native Firmenverwaltung im Backend erreichbar', response.status() === 200 && (await adminPage.locator('body').innerText()).includes('Musterkunde Alpha'));
+  response = await adminPage.goto(`${base}/contao?do=portal_firma&act=edit&id=${accounts.A.companyId}`);
+  check('Natives DCA-Bearbeitungsformular verfügbar', response.status() === 200 && await adminPage.locator('input[name="name"]').inputValue() === 'Musterkunde Alpha');
+  await adminPage.screenshot({ path: path.join(output, 'portal-backend.png'), fullPage: true });
+  await admin.close();
+  await fs.writeFile(path.join(output, 'browser-results.json'), JSON.stringify({ passed: checks.length, checks }, null, 2));
+  console.log(JSON.stringify({ passed: checks.length, screenshots: ['portal-desktop.png', 'portal-mobile.png', 'portal-backend.png'] }));
+} catch (error) {
+  let message = error.message;
+  for (const account of Object.values(accounts)) message = message.replaceAll(account.password, '[redacted]');
+  console.error(message);
+  process.exitCode = 1;
+} finally { await browser.close(); }

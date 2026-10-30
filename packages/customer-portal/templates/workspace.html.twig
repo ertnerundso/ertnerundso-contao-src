@@ -1,0 +1,111 @@
+<div class="portal-layout">
+  <aside class="portal-sidebar">
+    <a href="/" aria-label="ERTNER&SO Startseite"><svg role="img" aria-label="ERTNER&amp;SO" width="148" height="15" viewBox="0 0 92.11 8.9" fill="currentColor"><use href="{{ assetBase }}/assets/images/logo.svg#Ebene_1-2"/></svg></a>
+    <p class="micro">Kundenportal</p>
+    <p>{{ tenant.companyName }}</p>
+    <details class="portal-menu" open>
+      <summary>Navigation</summary>
+      <form action="{{ path('eunds_customer_portal', {view: 'projekte'}) }}" role="search" class="portal-search">
+      <label for="portal-search">Projekte suchen</label>
+      <input class="input" type="search" id="portal-search" name="q" value="{{ query }}" maxlength="100" placeholder="Projektname" aria-keyshortcuts="Control+k Meta+k">
+      <button class="text-link" type="submit">Suchen</button>
+      </form>
+      <nav aria-label="Kundenportal">
+        {% for key, label in titles %}
+          <a href="{{ path('eunds_customer_portal', {view: key}) }}" {% if view == key %}class="text-link" aria-current="page"{% endif %}>
+            {{ label }}{% if key == 'pruefen' and reviews|length %} <span aria-label="{{ reviews|length }} {{ reviews|length == 1 ? 'Version' : 'Versionen' }} zur Prüfung">({{ reviews|length }})</span>{% endif %}
+          </a>
+        {% endfor %}
+      </nav>
+      <div class="portal-identity">
+      <p>{{ tenant.memberName }}<br><span class="micro">{{ tenant.canApprove ? 'Entscheider' : 'Mitleser' }}</span></p>
+      <a class="text-link" href="/kundenbereich">Zugang und Abmeldung</a>
+      </div>
+    </details>
+  </aside>
+
+  <{{ mainTag|default('main') }} id="portal-main" class="portal-main">
+    <header class="portal-heading">
+      <p class="micro">{{ tenant.companyName }} / KUNDENPORTAL</p>
+      <h1>{{ titles[view] }}</h1>
+      {% if view == 'uebersicht' %}<p>Ihr Projektstand. Und der nächste Schritt.</p>{% endif %}
+    </header>
+
+    {% if view == 'uebersicht' %}
+      <section class="portal-section" aria-labelledby="waiting-title">
+        <p class="micro">Nächster Schritt</p>
+        <h2 id="waiting-title">{{ reviews|length ? 'Wartet auf Sie.' : 'Im Moment ist nichts zu tun.' }}</h2>
+        {% if reviews|length %}
+          <p>{{ reviews|length }} {{ reviews|length == 1 ? 'Version liegt' : 'Versionen liegen' }} zur Prüfung bereit.</p>
+          <a class="btn btn--primary" href="{{ path('eunds_customer_portal', {view: 'pruefen'}) }}">Zur Prüfung</a>
+        {% else %}<p>Wir melden uns, sobald die nächste Version bereitliegt.</p>{% endif %}
+      </section>
+    {% endif %}
+
+    {% if view in ['uebersicht', 'projekte'] %}
+      <section class="portal-section" aria-labelledby="projects-title">
+        <h2 id="projects-title">Ihre Projekte</h2>
+        {% if query %}<p>Suche nach „{{ query }}“</p>{% endif %}
+        <div class="portal-grid">
+          {% for project in projects %}
+            <article class="card">
+              <p class="micro">{{ project.vorlage == 'print' ? 'Montageanleitung / Print' : (project.vorlage == 'standbild' ? 'Standbild / Rendering' : 'Animation') }}</p>
+              <h3>{{ project.titel }}</h3>
+              {% if project.phases|length %}
+                <ol class="portal-phases" aria-label="Projektphasen">
+                  {% for phase in project.phases %}
+                    <li>{{ phase.name }} <span>— {{ {arbeit: 'In Arbeit', pruefung: 'Wartet auf Ihre Freigabe', korrektur: 'Korrektur angefordert', freigegeben: 'Freigegeben'}[phase.status]|default('In Arbeit') }}</span></li>
+                  {% endfor %}
+                </ol>
+              {% else %}<p>Wir bereiten die nächsten Schritte für Sie vor.</p>{% endif %}
+            </article>
+          {% else %}<p>{{ query ? 'Kein Projekt mit diesem Namen gefunden.' : 'Ihre Projekte erscheinen hier, sobald wir sie für Sie eingerichtet haben.' }}</p>{% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if view == 'pruefen' %}
+      <section class="portal-section" aria-label="Versionen zur Prüfung">
+        {% for review in reviews %}
+          <article class="card">
+            <p class="micro">{{ review.titel }} / {{ review.phase }}</p>
+            <h2>{{ review.dateiname }}</h2>
+            <p>Version {{ review.nummer }} liegt zur Prüfung bereit.</p>
+            <p>Die Medienanbindung wird eingerichtet. Sobald sie geprüft ist, können Sie die Version hier ansehen.</p>
+          </article>
+        {% else %}<p>Es wartet keine Version auf Ihre Freigabe. Wir melden uns, sobald es etwas zu prüfen gibt.</p>{% endfor %}
+      </section>
+    {% endif %}
+
+    {% if view == 'abgaben' %}
+      <section class="portal-section" aria-label="Fertige Dateien">
+        {% for delivery in deliveries %}
+          <article class="card">
+            <p class="micro">{{ delivery.titel }} / {{ delivery.format }}</p>
+            <h2>{{ delivery.dateiname }}</h2>
+            <p>{{ (delivery.groesse / 1048576)|number_format(1, ',', '.') }} MB</p>
+            <p>Der geschützte Dateizugriff wird eingerichtet.</p>
+          </article>
+        {% else %}<p>Hier finden Sie später die fertigen Dateien Ihrer Projekte.</p>{% endfor %}
+      </section>
+    {% endif %}
+
+    {% if view == 'team' %}
+      <section class="portal-section" aria-labelledby="team-title">
+        <h2 id="team-title">Ihr Team</h2>
+        <ul class="portal-team">{% for member in team %}<li>{{ member.firstname }} {{ member.lastname }} — {{ member.rolle == 'entscheider' ? 'Entscheider' : 'Mitleser' }}</li>{% endfor %}</ul>
+        <p>Für weitere Zugänge oder Änderungen Ihrer Berechtigungen wenden Sie sich bitte an ERTNER&amp;SO.</p>
+        <a class="text-link" href="/kundenlogin/passwort-vergessen">Passwort zurücksetzen</a>
+      </section>
+    {% endif %}
+
+    {% if view == 'uebersicht' and activity|length %}
+      <section class="portal-section" aria-labelledby="activity-title">
+        <h2 id="activity-title">Letzte Aktivitäten</h2>
+        <ul class="portal-activity">
+          {% for event in activity %}<li><time datetime="{{ event.zeitpunkt|date('c') }}">{{ event.zeitpunkt|date('d.m.Y H:i') }}</time> — {{ event.titel }}: {{ {version: 'Version bereitgestellt', kommentar: 'Neuer Kommentar', korrektur: 'Korrektur angefordert', freigabe: 'Freigegeben', abgabe: 'Abgabe bereitgestellt', download: 'Datei heruntergeladen'}[event.art]|default('Projekt aktualisiert') }}</li>{% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+  </{{ mainTag|default('main') }}>
+</div>
